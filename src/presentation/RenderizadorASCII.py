@@ -4,6 +4,7 @@ Contém a classe RenderizadorASCII, responsável por compor os caracteres ASCII
 horizontalmente e executar efeitos visuais de apresentação no terminal.
 """
 
+import sys
 import time
 
 try:
@@ -23,12 +24,14 @@ class RenderizadorASCII:
         velocidade_digitacao: float = 0.06,
         repeticoes_embaralhamento: int = 5,
         velocidade_embaralhamento: float = 0.20,
+        velocidade_subtitulo: float = 0.03,
     ) -> None:
         # Injeção de dependência da fonte (usa LETRAS por padrão)
         self.fonte: dict[str, list[str]] = fonte if fonte is not None else LETRAS
         self.velocidade_digitacao: float = velocidade_digitacao
         self.repeticoes_embaralhamento: int = repeticoes_embaralhamento
         self.velocidade_embaralhamento: float = velocidade_embaralhamento
+        self.velocidade_subtitulo: float = velocidade_subtitulo
 
     def formatar(self, palavra: str) -> str:
         """Função pura que monta uma única linha de texto em arte ASCII.
@@ -83,8 +86,16 @@ class RenderizadorASCII:
 
             time.sleep(self.velocidade_embaralhamento)
 
-    def exibir(self, texto: str, animado: bool = True) -> None:
-        """Orquestrador de apresentação: exibe o título animado ou estático."""
+    def animar_subtitulo(self, texto: str) -> None:
+        """Datilografa o subtítulo caractere por caractere no terminal."""
+        for caractere in texto:
+            sys.stdout.write(caractere)
+            sys.stdout.flush()
+            time.sleep(self.velocidade_subtitulo)
+        print()
+
+    def exibir(self, texto: str, subtitulo: str | None = None, animado: bool = True) -> None:
+        """Orquestrador de apresentação: exibe o título e o subtítulo opcional."""
         if animado:
             self.animar_digitacao(texto)
             self.animar_embaralhamento(texto)
@@ -93,15 +104,22 @@ class RenderizadorASCII:
             for linha in texto_final.splitlines():
                 print(self.formatar(linha))
 
+        # Se houver subtítulo, exibe logo abaixo
+        if subtitulo is not None:
+            if animado:
+                self.animar_subtitulo(subtitulo)
+            else:
+                print(subtitulo)
+
 
 # ==============================================================================
 # Função de Compatibilidade / Atalho
 # ==============================================================================
 
-def exibir_titulo(texto: str, animado: bool = True) -> None:
+def exibir_titulo(texto: str, subtitulo: str | None = None, animado: bool = True) -> None:
     """Atalho de conveniência que instancia e executa o RenderizadorASCII padrão."""
     renderizador = RenderizadorASCII()
-    renderizador.exibir(texto, animado=animado)
+    renderizador.exibir(texto, subtitulo=subtitulo, animado=animado)
 
 
 # ==============================================================================
@@ -109,6 +127,6 @@ def exibir_titulo(texto: str, animado: bool = True) -> None:
 # ==============================================================================
 
 if __name__ == "__main__":
-    # Exemplo utilizando a instância da Classe:
+    subtitulo_teste = '\tBem-Vindo a Nova Versão da nossa... a sua.... "Biblioteca 3.0" !'
     renderizador = RenderizadorASCII()
-    renderizador.exibir("Biblioteca\nvirtual", animado=True)
+    renderizador.exibir("Biblioteca\nvirtual", subtitulo=subtitulo_teste, animado=True)

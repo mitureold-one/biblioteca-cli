@@ -101,3 +101,30 @@ Refatoração das funções procedurais para a classe `RenderizadorASCII`:
 - **`animar_digitacao(texto)`:** Executa a animação de máquina de escrever.
 - **`animar_embaralhamento(texto)`:** Executa a alternância de símbolos.
 - **`exibir(texto, animado=True)`:** Ponto único de entrada e orquestração.
+
+
+---
+
+## 🎬 Etapa 7: Animação do Subtítulo (Datilografia em Linha)
+
+Diferente do banner ASCII multiline, o subtítulo é um texto corrido. Implementamos o método `animar_subtitulo(texto, velocidade=0.03)` dentro de `RenderizadorASCII`:
+- **Sem Limpeza de Tela:** Utiliza `sys.stdout.write` e `sys.stdout.flush()`, inserindo caractere a caractere logo abaixo do título ASCII já estabilizado.
+- **Orquestração Completa:** O método `exibir(texto, subtitulo, animado=True)` une o título ASCII com a datilografia suave do subtítulo em uma única chamada.
+
+---
+
+## ⚙️ Etapa 8: Centralização de Configurações (`config.py`)
+
+Aplicação do princípio de **Separação de Configuração e Execução**:
+- Criação de `src/presentation/config.py` para isolar metadados (`NOME_APLICACAO`, `VERSAO_BUILD`, `DATA_VERSAO`, `LINK_REPOSITORIO`, `AVISO_IMPORTANTE`), textos consolidados e constantes de layout (`LARGURA_TERMINAL = 100`, `CARACTERE_DIVISORIA = "─"`).
+- O arquivo `main.py` foi esvaziado de dados hardcoded e números mágicos, transformando-se em um orquestrador limpo de inicialização.
+
+---
+
+## 🧭 Etapa 9: Arquitetura de Menus com POO e Polimorfismo (`menu.py`)
+
+Evolução da navegação interativa no terminal aplicando padrões de engenharia:
+- **Padrão Template Method:** Criação da classe base abstrata `MenuBase(ABC)` que implementa o loop de execução `executar()`, desenha o cabeçalho fixo estático (`_desenhar()`) e delega a exibição e o processamento de opções para as subclasses (`exibir_opcoes()` e `processar_opcao()`).
+- **Eliminação de Código Duplicado (Princípio DRY):** Em vez de 4 funções separadas e repetitivas, implementamos a subclasse genérica `MenuCRUD(entidade)`, capaz de gerar menus de CRUD para qualquer entidade dinamicamente.
+- **Structural Pattern Matching (`match / case`):** Substituição de estruturas de `if/elif/else` pelo `match/case` idiomático do Python para roteamento de opções.
+- **Persistência de Layout Estático:** A cada transição de submenu, a tela limpa e redesenha o título ASCII e o subtítulo instantaneamente (`animado=False`), garantindo que apenas a seção central da interface mude dinamicamente enquanto o topo permanece fixo.
