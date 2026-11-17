@@ -17,8 +17,10 @@ Biblioteca/
 │   ├── domain/          # Entidades de negócio e interfaces de repositório
 │   ├── Infrastructure/  # Implementação de persistência e recursos externos
 │   └── presentation/    # Interface CLI, telas e renderizadores visuais (ASCII)
+│       ├── fontes_ascii.py # Catálogo de glifos e matrizes ASCII
 │       ├── main.py      # Ponto de entrada da aplicação
-│       └── titulo.py    # Renderizador modular de títulos em arte ASCII
+│       ├── titulo.py    # Renderizador modular de títulos em arte ASCII
+│       └── utils.py     # Utilitários de terminal e console
 ├── .gitignore
 └── README.md
 ```

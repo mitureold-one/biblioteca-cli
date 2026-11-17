@@ -1,38 +1,29 @@
-versao_build = 3.0
-data_versao = "Data Da Versão: 2024-16-10"
+try:
+    from src.presentation.titulo import RenderizadorASCII
+    from src.presentation.utils import desenhar_linha
+except ModuleNotFoundError:
+    from titulo import RenderizadorASCII
+    from utils import desenhar_linha
 
-link = "https://github.com/mitureold-one/biblioteca-/tree/main"
+
+VERSAO_BUILD = 3.0
+DATA_VERSAO = "Data Da Versão: 2024-16-10"
+LINK_REPOSITORIO = "https://github.com/mitureold-one/biblioteca-/tree/main"
 
 outras_versoes = f"""
-    Confiras versões anteriores em: {link}
+    Confira versões anteriores em: {LINK_REPOSITORIO}
 """
 
 aviso_importante = """
 Feito 100% Pela estupidez humana ! 
 """
 
-titulo = """
-    
-    ██████╗░██╗██████╗░██╗░░░░░██╗░█████╗░████████╗███████╗░█████╗░░█████╗░
-    ██╔══██╗██║██╔══██╗██║░░░░░██║██╔══██╗╚══██╔══╝██╔════╝██╔══██╗██╔══██╗
-    ██████╦╝██║██████╦╝██║░░░░░██║██║░░██║░░░██║░░░█████╗░░██║░░╚═╝███████║
-    ██╔══██╗██║██╔══██╗██║░░░░░██║██║░░██║░░░██║░░░██╔══╝░░██║░░██╗██╔══██║
-    ██████╦╝██║██████╦╝███████╗██║╚█████╔╝░░░██║░░░███████╗╚█████╔╝██║░░██║
-    ╚═════╝░╚═╝╚═════╝░╚══════╝╚═╝░╚════╝░░░░╚═╝░░░╚══════╝░╚════╝░╚═╝░░╚═╝
-
-    ██╗░░░██╗██╗██████╗░████████╗██╗░░░██╗░█████╗░██╗░░░░░
-    ██║░░░██║██║██╔══██╗╚══██╔══╝██║░░░██║██╔══██╗██║░░░░░
-    ╚██╗░██╔╝██║██████╔╝░░░██║░░░██║░░░██║███████║██║░░░░░
-    ░╚████╔╝░██║██╔══██╗░░░██║░░░██║░░░██║██╔══██║██║░░░░░
-    ░░╚██╔╝░░██║██║░░██║░░░██║░░░╚██████╔╝██║░░██║███████╗
-    ░░░╚═╝░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░░╚═════╝░╚═╝░░╚═╝╚══════╝
-"""
 subtitulo = f"""
-    \tBem-Vindo a Nova Versão da nossa... a sua.... \"Biblioteca {versao_build}\" !
+    \tBem-Vindo a Nova Versão da nossa... a sua.... \"Biblioteca {VERSAO_BUILD}\" !
        
 """
 
-linha = "-"*100
+linha = desenhar_linha(100)
 
 menu = f"""
     {linha}
@@ -40,14 +31,23 @@ menu = f"""
     ⬧ Usuários
     ⬧ Empréstimos
     ⬧ Devoluções
-    ⬧ sair
+    ⬧ Sair
     {linha}
 """
-Header = titulo + subtitulo
-main = menu
-footer = f"{data_versao}\n{outras_versoes}\n{aviso_importante}"
 
-tela_01 = Header + main + footer
+footer = f"{DATA_VERSAO}\n{outras_versoes}\n{aviso_importante}"
 
-print(tela_01)
 
+def iniciar_aplicacao() -> None:
+    # 1. Instancia o renderizador e executa a exibição animada do título ASCII
+    renderizador = RenderizadorASCII()
+    renderizador.exibir("Biblioteca\nvirtual", animado=True)
+
+    # 2. Exibe o restante da interface de entrada
+    print(subtitulo)
+    print(menu)
+    print(footer)
+
+
+if __name__ == "__main__":
+    iniciar_aplicacao()

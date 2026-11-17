@@ -1,188 +1,107 @@
-"""Módulo de Renderização e Exibição de Título em Arte ASCII.
+"""Módulo de Renderização e Animação de Título em Arte ASCII.
 
-Este módulo decompõe o título em matrizes de caracteres individuais e as
-recompõe horizontalmente para renderização no terminal CLI.
-Os desenhos base foram adaptados de fontes ASCII com matrizes de 6 linhas.
+Contém a classe RenderizadorASCII, responsável por compor os caracteres ASCII
+horizontalmente e executar efeitos visuais de apresentação no terminal.
 """
 
-# ==============================================================================
-# 1ª ETAPA: Glifos ASCII (Matrizes Individuais)
-# Cada caractere é definido em uma string multiline com exatamente 6 linhas
-# de altura e largura uniforme por caractere para evitar desalinhamento.
-# ==============================================================================
+import time
 
-LETRA_A = """
-░█████╗░
-██╔══██╗
-███████║
-██╔══██║
-██║░░██║
-╚═╝░░╚═╝
-"""
+try:
+    from src.presentation.fontes_ascii import LETRAS
+    from src.presentation.utils import limpar_tela
+except ModuleNotFoundError:
+    from fontes_ascii import LETRAS
+    from utils import limpar_tela
 
-LETRA_B = """
-██████╗░
-██╔══██╗
-██████╦╝
-██╔══██╗
-██████╦╝
-╚═════╝░
-"""
 
-LETRA_C = """
-░█████╗░
-██╔══██╗
-██║░░╚═╝
-██║░░██╗
-╚█████╔╝
-░╚════╝░
-"""
+class RenderizadorASCII:
+    """Responsável por renderizar e animar títulos em arte ASCII no terminal."""
 
-LETRA_E = """
-███████╗
-██╔════╝
-█████╗░░
-██╔══╝░░
-███████╗
-╚══════╝
-"""
+    def __init__(
+        self,
+        fonte: dict[str, list[str]] | None = None,
+        velocidade_digitacao: float = 0.06,
+        repeticoes_embaralhamento: int = 5,
+        velocidade_embaralhamento: float = 0.20,
+    ) -> None:
+        # Injeção de dependência da fonte (usa LETRAS por padrão)
+        self.fonte: dict[str, list[str]] = fonte if fonte is not None else LETRAS
+        self.velocidade_digitacao: float = velocidade_digitacao
+        self.repeticoes_embaralhamento: int = repeticoes_embaralhamento
+        self.velocidade_embaralhamento: float = velocidade_embaralhamento
 
-LETRA_I = """
-██╗
-██║
-██║
-██║
-██║
-╚═╝
-"""
+    def formatar(self, palavra: str) -> str:
+        """Função pura que monta uma única linha de texto em arte ASCII.
 
-LETRA_L = """
-██╗░░░░░
-██║░░░░░
-██║░░░░░
-██║░░░░░
-███████╗
-╚══════╝
-"""
+        - Converte a palavra para maiúsculas.
+        - Busca as matrizes no catálogo da fonte injetada (self.fonte).
+        - Combina as linhas horizontalmente com zip(*...).
+        - Retorna o desenho montado em uma string multiline.
+        """
+        palavra = palavra.upper()
+        palavra_formatada = [self.fonte[letra] for letra in palavra]
 
-LETRA_O = """
-░█████╗░
-██╔══██╗
-██║░░██║
-██║░░██║
-╚█████╔╝
-░╚════╝░
-"""
+        resultado = []
+        for linha in zip(*palavra_formatada):
+            resultado.append(" ".join(linha))
 
-LETRA_R = """
-██████╗░
-██╔══██╗
-██████╔╝
-██╔══██╗
-██║░░██║
-╚═╝░░╚═╝
-"""
+        return "\n".join(resultado)
 
-LETRA_T = """
-████████╗
-╚══██╔══╝
-░░░██║░░░
-░░░██║░░░
-░░░██║░░░
-░░░╚═╝░░░
-"""
+    def animar_digitacao(self, texto: str) -> None:
+        """Executa a animação de máquina de escrever letra por letra."""
+        linhas_concluidas: list[str] = []
 
-LETRA_U = """
-██╗░░░██╗
-██║░░░██║
-██║░░░██║
-██║░░░██║
-╚██████╔╝
-░╚═════╝░
-"""
+        for linha in texto.splitlines():
+            for i in range(1, len(linha) + 1):
+                fatia = linha[:i]
 
-LETRA_V = """
-██╗░░░██╗
-██║░░░██║
-╚██╗░██╔╝
-░╚████╔╝░
-░░╚██╔╝░░
-░░░╚═╝░░░
-"""
+                limpar_tela()
 
-LETRA_ESPECIAL_EXCLAMACAO = """
-██╗
-██║
-██║
-╚═╝
-██╗
-╚═╝
-"""
+                # Redesenha as linhas anteriores já concluídas
+                for linha_pronta in linhas_concluidas:
+                    print(linha_pronta)
+
+                # Imprime a fatia atual sendo digitada
+                print(self.formatar(fatia), flush=True)
+
+                time.sleep(self.velocidade_digitacao)
+
+            linhas_concluidas.append(self.formatar(linha))
+
+    def animar_embaralhamento(self, texto: str) -> None:
+        """Alterna os símbolos '?' e '!' no final do texto por N ciclos."""
+        texto_base = texto.rstrip("!? ")
+        simbolos = ["?", "!"]
+
+        for i in range(self.repeticoes_embaralhamento * 2):
+            simbolo = simbolos[i % 2]
+            conteudo = f"{texto_base} {simbolo}"
+
+            limpar_tela()
+            for linha in conteudo.splitlines():
+                print(self.formatar(linha))
+
+            time.sleep(self.velocidade_embaralhamento)
+
+    def exibir(self, texto: str, animado: bool = True) -> None:
+        """Orquestrador de apresentação: exibe o título animado ou estático."""
+        if animado:
+            self.animar_digitacao(texto)
+            self.animar_embaralhamento(texto)
+        else:
+            texto_final = f"{texto.rstrip('!? ')} !"
+            for linha in texto_final.splitlines():
+                print(self.formatar(linha))
 
 
 # ==============================================================================
-# 2ª ETAPA: Pré-processamento e Dicionário de Caracteres
+# Função de Compatibilidade / Atalho
 # ==============================================================================
 
-def definir_linhas(letra: str) -> list[str]:
-    """Converte uma string multiline de uma letra em uma lista de linhas.
-
-    Aplica strip() para remover quebras nas bordas e splitlines() para
-    separar a matriz nas 6 fatias horizontais que compõem o glifo.
-    """
-    return letra.strip().splitlines()
-
-
-# Mapeamento oficial de caracteres suportados.
-# Cada entrada DEVE ser uma lista com exatamente 6 elementos (linhas).
-LETRAS = {
-    "A": definir_linhas(LETRA_A),
-    "B": definir_linhas(LETRA_B),
-    "C": definir_linhas(LETRA_C),
-    "E": definir_linhas(LETRA_E),
-    "I": definir_linhas(LETRA_I),
-    "L": definir_linhas(LETRA_L),
-    "O": definir_linhas(LETRA_O),
-    "R": definir_linhas(LETRA_R),
-    "T": definir_linhas(LETRA_T),
-    "U": definir_linhas(LETRA_U),
-    "V": definir_linhas(LETRA_V),
-    "!": definir_linhas(LETRA_ESPECIAL_EXCLAMACAO),
-    " ": ["    "] * 6,  # Espaço em branco: 4 espaços de largura x 6 linhas de altura
-}
-
-
-# ==============================================================================
-# 3ª ETAPA: Formatação e Apresentação (Separação de Responsabilidades)
-# ==============================================================================
-
-def formatar_titulo(palavra: str) -> str:
-    """Função pura responsável por compor uma única linha de texto em arte ASCII.
-
-    - Converte a palavra para maiúsculas.
-    - Localiza as matrizes de cada caractere no dicionário.
-    - Utiliza zip(*...) para combinar horizontalmente cada uma das 6 linhas.
-    - Retorna a string pronta com as linhas separadas por quebra de linha ('\\n').
-    """
-    palavra = palavra.upper()
-    palavra_formatada = [LETRAS[letra] for letra in palavra]
-
-    resultado = []
-    for linha in zip(*palavra_formatada):
-        resultado.append(" ".join(linha))
-
-    return "\n".join(resultado)
-
-
-def exibir_titulo(texto: str) -> None:
-    """Função de apresentação (I/O) que imprime o título formatado no terminal.
-
-    Permite textos com quebras de linha ('\\n'), processando e imprimindo
-    cada linha de blocos sequencialmente.
-    """
-    for linha in texto.splitlines():
-        texto_formatado = formatar_titulo(linha)
-        print(texto_formatado)
+def exibir_titulo(texto: str, animado: bool = True) -> None:
+    """Atalho de conveniência que instancia e executa o RenderizadorASCII padrão."""
+    renderizador = RenderizadorASCII()
+    renderizador.exibir(texto, animado=animado)
 
 
 # ==============================================================================
@@ -190,4 +109,6 @@ def exibir_titulo(texto: str) -> None:
 # ==============================================================================
 
 if __name__ == "__main__":
-    exibir_titulo("Biblioteca\nvirtual !")
+    # Exemplo utilizando a instância da Classe:
+    renderizador = RenderizadorASCII()
+    renderizador.exibir("Biblioteca\nvirtual", animado=True)

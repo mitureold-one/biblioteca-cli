@@ -37,7 +37,7 @@ O título em arte ASCII é o elemento visual central da CLI. O objetivo deste m�
 
 ## ⚙️ Etapa 3: Refatoração, Consistência da Matriz e Separação de Papéis
 
-Durante os testes de integração e composição, foram identificados e solucionados três desafios de design e geometria de caracteres:
+Durante os testes de integração e composição, foram identificados e solucionados desafios de design e geometria de caracteres:
 
 ### 1. Separação de Responsabilidades (Função Pura vs. Efeito Colateral)
 Para permitir testes unitários e reutilização, a lógica de impressão foi dividida:
@@ -60,7 +60,44 @@ Para permitir testes unitários e reutilização, a lógica de impressão foi di
 
 ---
 
-## 🎬 Etapa 4: Próximo Passo — Animação no Terminal
+## 🎬 Etapa 4: Animações no Terminal
 
-Com os glifos estáveis e a função `formatar_titulo` desacoplada da impressão, a arquitetura está pronta para a camada de animação:
-- **Efeito Máquina de Escrever:** Fatiamento progressivo (`palavra[:i]`), renderização via `formatar_titulo` e atualização de tela com intervalo de tempo (`time.sleep`) e limpeza de tela.
+Implementação de duas animações na camada de apresentação:
+
+### 1. Limpeza de Tela com Códigos ANSI (`limpar_tela`)
+- Em vez de chamadas lentas de sistema operacional (`os.system('cls')`) que causam *flickering* (tela piscando), usamos códigos de controle ANSI nativos: `\033[H\033[J`. O cursor volta ao topo e limpa a tela instantaneamente e sem piscar.
+
+### 2. Efeito Máquina de Escrever (`anima_digitacao`)
+- Fatiamento progressivo (`linha[:i]`).
+- Mantém o histórico das linhas anteriores completas enquanto digita a linha atual logo abaixo.
+- Parâmetro configurável de `velocidade`.
+
+### 3. Efeito Alternância / Embaralhamento (`anima_embaralhamento`)
+- Implementação do glifo `?` (`LETRA_ESPECIAL_INTERROGACAO`).
+- Alterna entre `?` e `!` no final da frase por um número definido de repetições (`repeticoes=5`), estabilizando em `!` no final.
+
+
+---
+
+## 🏛️ Etapa 5: Refatoração Arquitetural — Separação de Dados e Lógica
+
+Para manter os princípios de **Clean Code** e **Single Responsibility**:
+- **`fontes_ascii.py` (Dados):** Isola os 14 glifos em matrizes puras e o dicionário `LETRAS`. Adicionar novas letras no futuro altera apenas este arquivo, sem risco de quebrar a lógica de renderização.
+- **`titulo.py` (Lógica e Apresentação):** Reduzido para menos de 100 linhas, contendo exclusivamente a orquestração, a formatação pura (`zip(*...)`), as animações e os utilitários de tela.
+- **`main.py` (Aplicação):** Ponto de entrada limpo e desacoplado que apenas orquestra o fluxo inicial.
+
+
+---
+
+## 🧩 Etapa 6: Orientação a Objetos (`RenderizadorASCII`)
+
+Refatoração das funções procedurais para a classe `RenderizadorASCII`:
+
+### Estrutura da Classe:
+- **`__init__(fonte, velocidade_digitacao, repeticoes_embaralhamento, velocidade_embaralhamento)`:**
+  - Encapsula as configurações visuais e o catálogo de glifos (`self.fonte`).
+  - Suporta **Injeção de Dependência**: é possível injetar diferentes fontes ou velocidades no momento da instanciação.
+- **`formatar(palavra)`:** Método que gera a string matricial horizontal usando `self.fonte`.
+- **`animar_digitacao(texto)`:** Executa a animação de máquina de escrever.
+- **`animar_embaralhamento(texto)`:** Executa a alternância de símbolos.
+- **`exibir(texto, animado=True)`:** Ponto único de entrada e orquestração.
